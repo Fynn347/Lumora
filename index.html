@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <title>Roblox Angebote verwalten</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron&display=swap" rel="stylesheet" />
   <style>
     body {
       font-family: 'Orbitron', sans-serif;
@@ -34,6 +34,7 @@
       border: 1px solid #30363d;
       background-color: #0d1117;
       color: #f0f0f0;
+      box-sizing: border-box;
     }
     button {
       background: linear-gradient(45deg, #58a6ff, #1f6feb);
@@ -53,7 +54,7 @@
       border-left: 5px solid #58a6ff;
       border-radius: 10px;
       color: #58a6ff;
-      word-break: break-all;
+      word-break: break-word;
     }
     .preview-avatar {
       display: flex;
@@ -94,13 +95,13 @@
 
     async function fetchAvatar(username) {
       try {
-        const res = await fetch(`https://users.roblox.com/v1/usernames/users`, {
+        const res = await fetch('https://users.roblox.com/v1/usernames/users', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ usernames: [username] })
         });
         const data = await res.json();
-        const userId = data.data[0]?.id;
+        const userId = data.data?.[0]?.id;
         if (!userId) {
           avatarPreview.style.display = 'none';
           return;
@@ -113,10 +114,13 @@
       }
     }
 
-    document.getElementById('username').addEventListener('blur', e => {
+    document.getElementById('username').addEventListener('blur', (e) => {
       const name = e.target.value.trim();
-      if (name.length > 0) fetchAvatar(name);
-      else avatarPreview.style.display = 'none';
+      if (name.length > 0) {
+        fetchAvatar(name);
+      } else {
+        avatarPreview.style.display = 'none';
+      }
     });
 
     form.addEventListener('submit', async (e) => {
@@ -132,23 +136,22 @@
       }
 
       try {
-        const res = await fetch('/create', {
+        const response = await fetch('/create', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ username, title, description, duration }),
         });
 
-        if (res.redirected) {
-          const url = res.url;
+        if (response.redirected) {
           resultDiv.style.display = 'block';
-          resultDiv.innerHTML = `✅ Dein Angebot ist jetzt öffentlich erreichbar:<br><a href="${url}" target="_blank">${url}</a>`;
+          resultDiv.innerHTML = `✅ Dein Angebot ist jetzt öffentlich erreichbar:<br><a href="${response.url}" target="_blank">${response.url}</a>`;
           form.reset();
           avatarPreview.style.display = 'none';
         } else {
           alert('Fehler beim Erstellen des Angebots.');
         }
-      } catch (err) {
-        alert('Netzwerkfehler.');
+      } catch (error) {
+        alert('Netzwerkfehler. Bitte überprüfe deine Verbindung.');
       }
     });
   </script>
