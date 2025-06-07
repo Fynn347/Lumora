@@ -7,19 +7,18 @@ const PORT = process.env.PORT || 3000;
 const DATA_DIR = path.join(__dirname, 'angebote');
 if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR);
 
-// Middleware zum Parsen von Formular- und JSON-Daten
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
-// Statische Ordner
-app.use('/angebote', express.static(DATA_DIR));
-app.use(express.static(path.join(__dirname, 'public'))); // Nutze 'public' als statischen Ordner für HTML, CSS etc.
+// Statische Dateien (Frontend)
+app.use(express.static(path.join(__dirname, 'public')));
 
-// Route zum Erstellen eines Angebots
+// Angebotsseiten öffentlich bereitstellen
+app.use('/angebote', express.static(DATA_DIR));
+
 app.post('/create', (req, res) => {
   const { username, title, description, duration } = req.body;
 
-  // Validierung (kurz)
   if (!username || !title || !description || !duration) {
     return res.status(400).send('Fehlende Felder');
   }
@@ -34,12 +33,32 @@ app.post('/create', (req, res) => {
   <head>
     <meta charset="UTF-8">
     <title>${title}</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background: #0d1117;
+        color: #c9d1d9;
+        padding: 30px;
+      }
+      h1 {
+        color: #58a6ff;
+      }
+      p {
+        font-size: 1.1em;
+      }
+      .footer {
+        margin-top: 40px;
+        font-size: 0.9em;
+        color: #8b949e;
+      }
+    </style>
   </head>
   <body>
     <h1>${title}</h1>
-    <p><strong>von:</strong> ${username}</p>
+    <p><strong>Von:</strong> ${username}</p>
     <p>${description.replace(/\n/g, '<br>')}</p>
     <p><em>Gültig bis:</em> ${new Date(expires).toLocaleString()}</p>
+    <div class="footer">Angebot erstellt am ${new Date(id).toLocaleString()}</div>
   </body>
   </html>
   `;
@@ -53,7 +72,6 @@ app.post('/create', (req, res) => {
   }
 });
 
-// Server starten
 app.listen(PORT, () => {
   console.log(`✅ Server läuft auf http://localhost:${PORT}`);
 });
